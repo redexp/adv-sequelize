@@ -1,0 +1,46 @@
+{
+  "name": "@adv/sequelize",
+  "version": "1.0.0",
+  "description": "Create sequelize models with adv",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --ui bdd ./tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/redexp/adv-sequelize.git"
+  },
+  "keywords": [
+    "ajv",
+    "adv",
+    "sequelize",
+    "db",
+    "model",
+    "json",
+    "validator"
+  ],
+  "author": "Sergii Kliuchnyk <sergiikliuchnyk@gmail.com> (https://github.com/redexp)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/redexp/adv-sequelize/issues"
+  },
+  "homepage": "https://github.com/redexp/adv-sequelize#readme",
+  "dependencies": {
+    "@babel/types": "^7.13.12",
+    "adv-parser": "^1.0.2",
+    "lodash.clonedeep": "^4.5.0",
+    "lodash.omit": "^4.5.0",
+    "lodash.pick": "^4.4.0"
+  },
+  "devDependencies": {
+    "ajv": "^7.2.3",
+    "chai": "^4.3.4",
+    "chai-shallow-deep-equal": "^1.4.6",
+    "mocha": "^8.3.2",
+    "sequelize": "^6.5.1"
+  },
+  "peerDependencies": {
+    "sequelize": "^6.5.1",
+    "ajv": "^7.2.3"
+  }
+}
