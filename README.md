@@ -1,5 +1,7 @@
 # adv-sequelize
 
+[![Build Status](https://travis-ci.com/redexp/adv-sequelize.svg?branch=master)](https://travis-ci.com/redexp/adv-sequelize)
+
 Create sequelize models with adv syntax
 
 ## Usage

@@ -1,4 +1,3 @@
-const {DataTypes} = require('sequelize');
 const parser = require('adv-parser');
 const defaultSchemas = require('adv-parser/schemas');
 const defaultMethods = require('adv-parser/methods');
@@ -9,11 +8,14 @@ const cloneDeep = require('lodash.clonedeep');
 const modelSchemas = require('./schemas');
 const modelMethods = require('./methods/model');
 const columnMethods = require('./methods/column');
+const dataTypeMethods = require('./methods/dataType');
+const functions = require('./functions');
 
 const methods = {
 	...defaultMethods,
 	...modelMethods,
 	...columnMethods,
+	...dataTypeMethods,
 };
 
 const objectOptions = {
@@ -27,15 +29,20 @@ const columnMethodsNames = Object.keys(columnMethods);
 
 module.exports = function (code, {
 	schemas = {...defaultSchemas, ...modelSchemas},
-	dataTypes: D = DataTypes,
+	dataTypes: D,
 	defaultJsonType,
 }) {
+	if (!D) {
+		D = require('sequelize').DataTypes;
+	}
+
 	defaultJsonType = defaultJsonType || D.JSON;
 
 	const {title, required, properties, ...rest} = parser(code, {
 		schemas,
 		methods,
 		objectOptions,
+		functions,
 	});
 
 	const schema = {
@@ -51,7 +58,7 @@ module.exports = function (code, {
 		options.comment = schema.description;
 	}
 
-	const toDataType = type => {
+	const toDataType = (type, columnSchema = {}) => {
 		switch (type) {
 		case 'object':
 		case 'array':
@@ -59,11 +66,23 @@ module.exports = function (code, {
 		case 'number':
 			return D.INTEGER;
 		default:
-			let TYPE = type.toUpperCase();
+			let TYPE = type;
 
-			if (D[TYPE]) return D[TYPE];
+			if (typeof TYPE === 'string') {
+				TYPE = TYPE.toUpperCase();
+			}
 
-			throw new Error('Invalid column validator type: ' + JSON.stringify(type));
+			if (!has(D, TYPE)) {
+				throw new Error('Invalid column validator type: ' + JSON.stringify(type));
+			}
+
+			TYPE = get(D, TYPE);
+
+			if (type === 'string' && columnSchema.maxLength) {
+				TYPE = TYPE(columnSchema.maxLength);
+			}
+
+			return TYPE;
 		}
 	}
 
@@ -129,18 +148,20 @@ module.exports = function (code, {
 				throw new Error(`All items in "${schemaOptions.anyOf ? 'anyOf' : 'allOf'}" must be same type`);
 			}
 
-			dataType = toDataType(mainType);
+			dataType = toDataType(mainType, schemaOptions);
 		}
 		else if (!dataType) {
-			dataType = toDataType(type);
+			dataType = toDataType(type, schemaOptions);
 		}
-		else if (typeof dataType === 'string') {
-			if (D[dataType]) {
-				dataType = D[dataType];
-			}
-			else {
-				throw new Error('Invalid column data type: ' + JSON.stringify(dataType));
-			}
+		else if (isDataType(D, dataType)) {
+			dataType = convertDataType(D, dataType);
+		}
+		else {
+			throw new Error('Invalid column data type: ' + JSON.stringify(dataType));
+		}
+
+		if (isDataType(D, columnOptions.defaultValue)) {
+			columnOptions.defaultValue = convertDataType(D, columnOptions.defaultValue);
 		}
 
 		columns[name] = {
@@ -151,3 +172,58 @@ module.exports = function (code, {
 
 	return {name: title, columns, options, schema: cloneDeep(schema)};
 };
+
+function get(obj, path) {
+	if (typeof path !== 'string') return;
+
+	if (path.includes('.')) {
+		return path.split('.').reduce((src, prop) => src[prop], obj);
+	}
+
+	return obj[path];
+}
+
+function has(obj, path) {
+	return typeof get(obj, path) !== 'undefined';
+}
+
+function getDataType(item) {
+	return item && (
+		(item.type === 'DataType' && item.path && item) ||
+		(item.dataType && item.dataType.type === 'DataType' && item.dataType.path && item.dataType)
+	);
+}
+
+function isDataType(D, item) {
+	var type = getDataType(item);
+
+	return !!type && has(D, type.path);
+}
+
+function convertDataType(D, item) {
+	var dataType = getDataType(item);
+
+	if (!dataType) return item;
+
+	var TYPE = get(D, dataType.path);
+
+	if (!TYPE) {
+		throw new Error(`Unknown data type: ${JSON.stringify(dataType.path)}`)
+	}
+
+	if (dataType.args) {
+		TYPE = TYPE.apply(null, dataType.args.map(item => convertDataType(D, item)));
+	}
+
+	if (dataType.UNSIGNED) {
+		TYPE = TYPE.UNSIGNED;
+	}
+	if (dataType.ZEROFILL) {
+		TYPE = TYPE.ZEROFILL;
+	}
+	if (dataType.BINARY) {
+		TYPE = TYPE.BINARY;
+	}
+
+	return TYPE;
+}

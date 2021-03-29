@@ -27,7 +27,7 @@
   "homepage": "https://github.com/redexp/adv-sequelize#readme",
   "dependencies": {
     "@babel/types": "^7.13.12",
-    "adv-parser": "^1.0.2",
+    "adv-parser": "^1.1.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.omit": "^4.5.0",
     "lodash.pick": "^4.4.0"
@@ -35,8 +35,8 @@
   "devDependencies": {
     "ajv": "^7.2.3",
     "chai": "^4.3.4",
-    "chai-shallow-deep-equal": "^1.4.6",
     "mocha": "^8.3.2",
+    "pg": "^8.5.1",
     "sequelize": "^6.5.1"
   },
   "peerDependencies": {
