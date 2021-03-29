@@ -1,5 +1,5 @@
 {
-  "name": "@adv/sequelize",
+  "name": "adv-sequelize",
   "version": "1.0.0",
   "description": "Create sequelize models with adv",
   "main": "index.js",
