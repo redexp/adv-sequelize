@@ -1,6 +1,6 @@
 {
   "name": "adv-sequelize",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Create sequelize models with adv",
   "main": "index.js",
   "scripts": {
@@ -40,7 +40,7 @@
     "sequelize": "^6.5.1"
   },
   "peerDependencies": {
-    "sequelize": "^6.5.1",
-    "ajv": "^7.2.3"
+    "sequelize": ">=3",
+    "ajv": "*"
   }
 }

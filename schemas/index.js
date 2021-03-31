@@ -5,11 +5,14 @@ const schemas = {};
 const types = {
 	string: [
 		'STRING',
+		'CHAR',
 		'TEXT',
 		'CITEXT',
 
+		'TIME',
 		'DATE',
 		'DATEONLY',
+		'NOW',
 		'UUID',
 		'UUIDV1',
 		'UUIDV4',
@@ -19,11 +22,15 @@ const types = {
 		'MACADDR',
 
 		'GEOMETRY',
+		'GEOGRAPHY',
 
 		'BLOB',
 	],
 	integer: [
 		'INTEGER',
+		'TINYINT',
+		'SMALLINT',
+		'MEDIUMINT',
 		'BIGINT',
 	],
 	number: [
@@ -35,6 +42,7 @@ const types = {
 	object: [
 		'JSON',
 		'JSONB',
+		'HSTORE',
 	],
 	boolean: [
 		'BOOLEAN',
