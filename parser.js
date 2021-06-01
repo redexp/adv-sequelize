@@ -170,6 +170,8 @@ module.exports = function (code, {
 		};
 	});
 
+	parser(`${title} = ${JSON.stringify(schema)}`, {schemas});
+
 	return {name: title, columns, options, schema: cloneDeep(schema)};
 };
 

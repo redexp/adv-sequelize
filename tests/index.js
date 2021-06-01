@@ -201,6 +201,20 @@ describe('createModel', function () {
 				created_at: {type: 'string', format: 'date-time'},
 			}
 		});
+
+		const advParser = require('adv-parser');
+
+		var subSchema = advParser(`User.props('id')`, {schemas});
+
+		expect(subSchema).to.eql({
+			type: 'object',
+			additionalProperties: false,
+			required: ['id'],
+			properties: {
+				id: {type: 'integer', minimum: 1},
+			},
+			maxProperties: 10,
+		});
 	});
 
 	it('data types', function () {

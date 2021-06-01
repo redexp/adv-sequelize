@@ -1,6 +1,6 @@
 {
   "name": "adv-sequelize",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Create sequelize models with adv",
   "main": "index.js",
   "scripts": {
@@ -26,18 +26,18 @@
   },
   "homepage": "https://github.com/redexp/adv-sequelize#readme",
   "dependencies": {
-    "@babel/types": "^7.13.12",
-    "adv-parser": "^1.1.0",
+    "@babel/types": "^7.14.4",
+    "adv-parser": "^1.3.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.omit": "^4.5.0",
     "lodash.pick": "^4.4.0"
   },
   "devDependencies": {
-    "ajv": "^7.2.3",
+    "ajv": "^7.2.4",
     "chai": "^4.3.4",
-    "mocha": "^8.3.2",
-    "pg": "^8.5.1",
-    "sequelize": "^6.5.1"
+    "mocha": "^8.4.0",
+    "pg": "^8.6.0",
+    "sequelize": "^6.6.2"
   },
   "peerDependencies": {
     "sequelize": ">=3",
