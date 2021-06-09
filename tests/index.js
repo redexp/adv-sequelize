@@ -6,6 +6,10 @@ const {DataTypes: D} = require('sequelize');
 
 describe('createModel', function () {
 	const parser = require('../parser');
+	const define = require('../index');
+	const Sequelize = require('sequelize');
+	const sequelize = new Sequelize({dialect: 'postgres'});
+
 	var schemas = {};
 
 	const p = function (code) {
@@ -295,11 +299,7 @@ describe('createModel', function () {
 	});
 
 	it('define', function (done) {
-		const define = require('../index');
-		const Sequelize = require('sequelize');
-		const sequelize = new Sequelize({dialect: 'postgres'});
-
-		var User = define(`User = {name: STRING.minLength(3)}`, {sequelize});
+		const User = define(`User = {name: STRING.minLength(3)}`, {sequelize});
 		var user = new User();
 		user.name = 'a';
 
@@ -319,5 +319,29 @@ describe('createModel', function () {
 
 				done();
 			})
+	});
+
+	it('Model methods', function () {
+		const Model = define(`User = {id: id.primaryKey(true), name: string.minLength(3), age: number}`, {sequelize});
+
+		var v = Model.prop('id');
+
+		expect(Model).to.have.property('_idPropValidator').and.to.be.an('object');
+		expect(Model.prop('id')).to.equal(v);
+		expect(v.isValid(0)).to.eql(false);
+		expect(v.errors).to.be.an('array').and.to.have.length(1);
+		expect(v.isValid(1)).to.eql(true);
+
+		expect(() => v.validate(0)).to.throw(define.ColumnValidationError, 'should be >= 1');
+		expect(() => v.validate(1)).to.not.throw(define.ColumnValidationError, 'should be >= 1');
+
+		v = Model.props('name', 'age');
+
+		expect(Model).to.have.property('_name_agePropsValidator').and.to.be.an('object');
+		expect(Model.props('name', 'age')).to.equal(v);
+		expect(v.isValid({name: '', age: 0})).to.eql(false);
+		expect(v.errors).to.be.an('array').and.to.have.length(1);
+		expect(v.isValid({name: 'asd', age: 0})).to.eql(true);
+		expect(v.isValid({name: 'asd'})).to.eql(false);
 	});
 });
