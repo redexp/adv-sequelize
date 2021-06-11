@@ -50,6 +50,13 @@ describe('createModel', function () {
 			},
 			bestFriend: JSON.extend(Friend),
 			friends: [Friend].type(JSON),
+			typed: {
+				type: 'string',
+				minLength: 1,
+				
+				$type: INTEGER,
+				$autoIncrement: true,
+			},
 			enumInt: 1 || 2,
 			enumStr: 'a' || 'b',
 			andObj: Friend && {type: 'object'},
@@ -98,6 +105,11 @@ describe('createModel', function () {
 			},
 			friends: {
 				type: D.JSON,
+				allowNull: false,
+			},
+			typed: {
+				type: D.INTEGER,
+				autoIncrement: true,
 				allowNull: false,
 			},
 			enumInt: {
@@ -150,7 +162,7 @@ describe('createModel', function () {
 			type: 'object',
 			additionalProperties: false,
 			maxProperties: 10,
-			required: ['id', 'uuid', 'name', 'data', 'friend', 'bestFriend', 'friends', 'enumInt', 'enumStr', 'andObj', 'orInt', 'orStr', 'created_at'],
+			required: ['id', 'uuid', 'name', 'data', 'friend', 'bestFriend', 'friends', 'typed', 'enumInt', 'enumStr', 'andObj', 'orInt', 'orStr', 'created_at'],
 			properties: {
 				id: {type: 'integer', minimum: 1},
 				uuid: {type: 'string', format: 'uuid'},
@@ -175,6 +187,10 @@ describe('createModel', function () {
 				friends: {
 					type: 'array',
 					items: Friend.schema,
+				},
+				typed: {
+					type: 'string',
+					minLength: 1,
 				},
 				enumInt: {
 					type: 'number',
