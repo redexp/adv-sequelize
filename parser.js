@@ -31,6 +31,7 @@ module.exports = function (code, {
 	schemas = {...defaultSchemas, ...modelSchemas},
 	dataTypes: D,
 	defaultJsonType,
+	...parserParams
 }) {
 	if (!D) {
 		D = require('sequelize').DataTypes;
@@ -43,6 +44,7 @@ module.exports = function (code, {
 		methods,
 		objectOptions,
 		functions,
+		...parserParams,
 	});
 
 	const schema = {

@@ -326,7 +326,7 @@ describe('createModel', function () {
 			}, function (err) {
 				try {
 					expect(err).to.be.instanceOf(Sequelize.ValidationError);
-					expect(err.message).to.eql(`Validation error: should NOT have fewer than 3 characters`);
+					expect(err.message).to.eql(`Validation error: must NOT have fewer than 3 characters`);
 				}
 				catch (e) {
 					done(e);
@@ -348,8 +348,8 @@ describe('createModel', function () {
 		expect(v.errors).to.be.an('array').and.to.have.length(1);
 		expect(v.isValid(1)).to.eql(true);
 
-		expect(() => v.validate(0)).to.throw(define.ColumnValidationError, 'should be >= 1');
-		expect(() => v.validate(1)).to.not.throw(define.ColumnValidationError, 'should be >= 1');
+		expect(() => v.validate(0)).to.throw(define.ColumnValidationError, 'must be >= 1');
+		expect(() => v.validate(1)).to.not.throw(define.ColumnValidationError, 'must be >= 1');
 
 		v = Model.props('name', 'age');
 

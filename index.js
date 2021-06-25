@@ -1,6 +1,9 @@
 const parser = require('./parser');
 
-module.exports = function define(code, {sequelize: s, schemas, ajv, ...params} = {}) {
+module.exports = define;
+module.exports.parser = parser;
+
+function define(code, {sequelize: s, schemas, ajv, ...params} = {}) {
 	var DataTypes = s.DataTypes || s.Sequelize.DataTypes;
 
 	var {name, columns, options, schema} = parser(code, {
@@ -91,7 +94,7 @@ module.exports = function define(code, {sequelize: s, schemas, ajv, ...params} =
 	};
 
 	return Model;
-};
+}
 
 class ColumnValidationError extends Error {
 	constructor(message, errors) {
