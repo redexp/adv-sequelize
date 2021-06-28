@@ -106,6 +106,7 @@ describe('createModel', function () {
 			friends: {
 				type: D.JSON,
 				allowNull: false,
+				defaultValue: [],
 			},
 			typed: {
 				type: D.INTEGER,
@@ -360,4 +361,58 @@ describe('createModel', function () {
 		expect(v.isValid({name: 'asd', age: 0})).to.eql(true);
 		expect(v.isValid({name: 'asd'})).to.eql(false);
 	});
+
+	it('default array', function () {
+		const {columns, schema} = p(`User = {
+			test1: [number],
+			test2: [number].defaultValue([1]),
+			test3: [number].allowNull(true),
+			test4: ARRAY(INTEGER),
+		}`);
+
+		expect(columns).to.eql({
+			test1: {
+				type: D.JSONB,
+				allowNull: false,
+				defaultValue: [],
+			},
+			test2: {
+				type: D.JSONB,
+				allowNull: false,
+				defaultValue: [1],
+			},
+			test3: {
+				type: D.JSONB,
+				allowNull: true,
+			},
+			test4: {
+				type: D.ARRAY(D.INTEGER),
+				allowNull: false,
+			},
+		});
+
+		expect(schema).to.eql({
+			title: 'User',
+			type: 'object',
+			additionalProperties: false,
+			required: ['test1', 'test2', 'test3', 'test4'],
+			properties: {
+				test1: {
+					type: 'array',
+					items: {type: 'number'},
+				},
+				test2: {
+					type: 'array',
+					items: {type: 'number'},
+				},
+				test3: {
+					type: 'array',
+					items: {type: 'number'},
+				},
+				test4: {
+					type: 'array',
+				},
+			}
+		});
+	})
 });

@@ -166,6 +166,15 @@ module.exports = function (code, {
 			columnOptions.defaultValue = convertDataType(D, columnOptions.defaultValue);
 		}
 
+		if (
+			!columnOptions.defaultValue &&
+			!columnOptions.allowNull &&
+			(dataType === D.JSON || dataType === D.JSONB) &&
+			schemaOptions.type === 'array'
+		) {
+			columnOptions.defaultValue = [];
+		}
+
 		columns[name] = {
 			type: dataType,
 			...columnOptions,
