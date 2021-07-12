@@ -89,7 +89,7 @@ describe('createModel', function () {
 			},
 			age: {
 				type: D.INTEGER,
-				allowNull: true,
+				allowNull: false,
 			},
 			data: {
 				type: D.JSONB,
@@ -168,10 +168,15 @@ describe('createModel', function () {
 				id: {type: 'integer', minimum: 1},
 				uuid: {type: 'string', format: 'uuid'},
 				name: {
-					description: 'Name desc',
-					type: 'string',
-					minLength: 2,
-					maxLength: 10
+					anyOf: [
+						{
+							description: 'Name desc',
+							type: 'string',
+							minLength: 2,
+							maxLength: 10
+						},
+						{type: 'null'},
+					]
 				},
 				age: {type: 'number', minimum: 0},
 				data: {
@@ -406,13 +411,98 @@ describe('createModel', function () {
 					items: {type: 'number'},
 				},
 				test3: {
-					type: 'array',
-					items: {type: 'number'},
+					anyOf: [
+						{
+							type: 'array',
+							items: {type: 'number'},
+						},
+						{type: 'null'},
+					]
 				},
 				test4: {
 					type: 'array',
 				},
 			}
 		});
-	})
+	});
+
+	it('nullable', function () {
+		const {columns, schema} = p(`User = {
+			test1: string || null,
+			test2: (string || null).defaultValue(null),
+			test3: {field: number}.allowNull(true),
+			[test4]: {
+				field: number,
+				
+				$allowNull: true
+			},
+		}`);
+
+		expect(columns).to.eql({
+			test1: {
+				type: D.STRING,
+				allowNull: true,
+			},
+			test2: {
+				type: D.STRING,
+				allowNull: true,
+				defaultValue: null,
+			},
+			test3: {
+				type: D.JSONB,
+				allowNull: true,
+			},
+			test4: {
+				type: D.JSONB,
+				allowNull: true,
+			},
+		});
+
+		expect(schema).to.eql({
+			title: 'User',
+			type: 'object',
+			additionalProperties: false,
+			required: ['test1', 'test2', 'test3'],
+			properties: {
+				test1: {
+					anyOf: [
+						{type: 'string'},
+						{type: 'null'},
+					]
+				},
+				test2: {
+					anyOf: [
+						{type: 'string'},
+						{type: 'null'},
+					]
+				},
+				test3: {
+					anyOf: [
+						{
+							type: 'object',
+							additionalProperties: false,
+							required: ['field'],
+							properties: {
+								field: {type: 'number'}
+							}
+						},
+						{type: 'null'},
+					]
+				},
+				test4: {
+					anyOf: [
+						{
+							type: 'object',
+							additionalProperties: false,
+							required: ['field'],
+							properties: {
+								field: {type: 'number'}
+							}
+						},
+						{type: 'null'},
+					]
+				},
+			}
+		});
+	});
 });

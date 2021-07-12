@@ -99,12 +99,21 @@ module.exports = function (code, {
 			columnOptions.comment = schemaOptions.description;
 		}
 
-		if (!columnOptions.hasOwnProperty('allowNull')) {
-			columnOptions.allowNull = !required.includes(name);
-		}
-
 		if (type) {
 			schemaOptions.type = type;
+		}
+
+		if (
+			columnOptions.allowNull &&
+			!schemaOptions.anyOf &&
+			schemaOptions.type !== 'null'
+		) {
+			schemaOptions = {
+				anyOf: [
+					schemaOptions,
+					{type: 'null'},
+				]
+			};
 		}
 
 		schema.properties[name] = {
@@ -136,21 +145,25 @@ module.exports = function (code, {
 				schemaOptions.allOf
 			);
 
-			if (items.length === 0) {
+			if (items.length < 2) {
 				throw new Error(`Invalid number of items in "${schemaOptions.anyOf ? 'anyOf' : 'allOf'}"`);
 			}
 
-			let mainType = items[0].type;
+			let item = items[0];
 
-			if (!mainType) {
-				throw new Error(`Invalid "type" of item in "${schemaOptions.anyOf ? 'anyOf' : 'allOf'}"`);
+			if (item.type === 'null') {
+				item = items[1];
 			}
 
-			if (!items.every(item => item.type === mainType)) {
+			if (!item.type || item.type === 'null') {
+				throw new Error(`Invalid "type" of item[${items.indexOf(item)}] in "${schemaOptions.anyOf ? 'anyOf' : 'allOf'}"`);
+			}
+
+			if (items.some(({type}) => type !== item.type && type !== 'null')) {
 				throw new Error(`All items in "${schemaOptions.anyOf ? 'anyOf' : 'allOf'}" must be same type`);
 			}
 
-			dataType = toDataType(mainType, schemaOptions);
+			dataType = toDataType(item.type, item);
 		}
 		else if (!dataType) {
 			dataType = toDataType(type, schemaOptions);
@@ -164,6 +177,13 @@ module.exports = function (code, {
 
 		if (isDataType(D, columnOptions.defaultValue)) {
 			columnOptions.defaultValue = convertDataType(D, columnOptions.defaultValue);
+		}
+
+		if (!columnOptions.hasOwnProperty('allowNull')) {
+			columnOptions.allowNull = !!(
+				schemaOptions.anyOf &&
+				schemaOptions.anyOf.some(item => item.type === 'null')
+			);
 		}
 
 		if (
