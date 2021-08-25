@@ -4,9 +4,9 @@ module.exports = define;
 module.exports.parser = parser;
 
 function define(code, {sequelize: s, schemas, ajv, ...params} = {}) {
-	var DataTypes = s.DataTypes || s.Sequelize.DataTypes;
+	const DataTypes = s.DataTypes || s.Sequelize.DataTypes;
 
-	var {name, columns, options, schema} = parser(code, {
+	const {name, columns, options, schema} = parser(code, {
 		schemas,
 		dataTypes: DataTypes,
 		defaultJsonType: s.options.dialect === 'postgres' ? DataTypes.JSONB : DataTypes.JSON,
@@ -18,7 +18,7 @@ function define(code, {sequelize: s, schemas, ajv, ...params} = {}) {
 		Ajv = typeof Ajv.default === 'function' ? Ajv.default : Ajv;
 		ajv = new Ajv();
 
-		var hasFormats = false;
+		let hasFormats = false;
 
 		try {
 			hasFormats = !!require.resolve('ajv-formats');
@@ -32,16 +32,21 @@ function define(code, {sequelize: s, schemas, ajv, ...params} = {}) {
 		}
 	}
 
-	Object.keys(columns).forEach(function (name) {
-		const column = columns[name];
-		const columnSchema = schema.properties[name];
+	const instanceName = name.charAt(0).toLowerCase() + name.slice(1);
+
+	Object.keys(columns).forEach(function (prop) {
+		const column = columns[prop];
+		const columnSchema = schema.properties[prop];
 		const validator = ajv.compile(columnSchema);
+		const isDate = column.type === DataTypes.DATE;
 
 		column.validate = column.validate || {};
 
 		column.validate.adv = function (value) {
+			if (isDate && value instanceof Date) return;
+
 			if (!validator(value)) {
-				throw createError(validator.errors);
+				throw createError(validator.errors, instanceName + '.' + prop);
 			}
 		};
 	});
@@ -105,8 +110,24 @@ class ColumnValidationError extends Error {
 	}
 }
 
-function createError(errors) {
-	return new ColumnValidationError(errors.map(e => e.message).join('; '), errors);
+function createError(errors, propName = '') {
+	return new ColumnValidationError(
+		errors
+		.map(e => {
+			const prop = propName || (
+				(e.dataPath || e.instancePath)
+				.replace(/^\//, '')
+				.replace(/\/(\d+)$/, '[$1]')
+				.replace(/\/(\d+)\//g, '[$1].')
+				.replace(/\//g, '.')
+			);
+
+			return `${prop} ${e.message}`;
+		})
+		.join('; '),
+
+		errors
+	);
 }
 
 function createValidator(schema, ajv) {

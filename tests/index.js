@@ -321,8 +321,9 @@ describe('createModel', function () {
 	});
 
 	it('define', function (done) {
-		const User = define(`User = {name: STRING.minLength(3)}`, {sequelize});
+		const User = define(`User = {date: DATE, name: STRING.minLength(3)}`, {sequelize});
 		var user = new User();
+		user.date = new Date();
 		user.name = 'a';
 
 		user
@@ -332,7 +333,7 @@ describe('createModel', function () {
 			}, function (err) {
 				try {
 					expect(err).to.be.instanceOf(Sequelize.ValidationError);
-					expect(err.message).to.eql(`Validation error: must NOT have fewer than 3 characters`);
+					expect(err.message).to.eql(`Validation error: user.name must NOT have fewer than 3 characters`);
 				}
 				catch (e) {
 					done(e);
