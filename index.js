@@ -34,7 +34,7 @@ function define(code, {sequelize: s, schemas, ajv, ...params} = {}) {
 
 	const instanceName = name.charAt(0).toLowerCase() + name.slice(1);
 
-	Object.keys(columns).forEach(function (prop) {
+	for (const prop in columns) {
 		const column = columns[prop];
 		const columnSchema = schema.properties[prop];
 		const validator = ajv.compile(columnSchema);
@@ -49,7 +49,7 @@ function define(code, {sequelize: s, schemas, ajv, ...params} = {}) {
 				throw createError(validator.errors, instanceName + '.' + prop);
 			}
 		};
-	});
+	}
 
 	const Model = s.define(name, columns, options);
 
@@ -87,13 +87,13 @@ function define(code, {sequelize: s, schemas, ajv, ...params} = {}) {
 			properties: {},
 		};
 
-		props.forEach(prop => {
+		for (const prop of props) {
 			sch.properties[prop] = schema.properties[prop];
 
 			if (!sch.properties[prop]) {
 				throw new Error(`Unknown ${Model.name} column ${JSON.stringify(prop)}`);
 			}
-		});
+		}
 
 		return (Model[key] = createValidator(sch, ajv));
 	};

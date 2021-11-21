@@ -49,13 +49,11 @@ const types = {
 	]
 };
 
-for (let type in types) {
-	let names = types[type];
+for (const type in types) {
+	const names = types[type];
 
-	for (let i = 0; i < names.length; i++) {
-		let dataType = names[i];
-
-		schemas[dataType] = toAst(JSON.stringify({
+	for (const dataType of names) {
+		schemas[dataType] = toAst('!!' + JSON.stringify({
 			type,
 			dataType: {
 				type: 'DataType',

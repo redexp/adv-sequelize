@@ -50,17 +50,17 @@ describe('createModel', function () {
 			},
 			bestFriend: JSON.extend(Friend),
 			friends: [Friend].type(JSON),
-			typed: {
+			typed: !!{
 				type: 'string',
 				minLength: 1,
 				
-				$type: INTEGER,
-				$autoIncrement: true,
+				dataType: INTEGER,
+				autoIncrement: true,
 			},
 			enumInt: 1 || 2,
 			enumStr: 'a' || 'b',
-			andObj: Friend && {type: 'object'},
-			orInt: id || {type: 'integer'},
+			andObj: Friend && !!{type: 'object'},
+			orInt: id || !!{type: 'integer'},
 			orStr: string || uuid,
 			created_at: DATE.format('date-time'),
 			

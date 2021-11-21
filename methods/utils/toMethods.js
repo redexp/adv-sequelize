@@ -7,14 +7,14 @@ const set = require('adv-parser/methods/set');
  * @returns {Object<string, function(schema: Object, args: Array, params?: Object): Object>}
  */
 module.exports = function toMethods(source) {
-	var target = {};
+	const target = {};
 
-	Object.keys(source).forEach(function (name) {
+	for (const name in source) {
 		const type = source[name];
 
 		if (typeof type === 'function') {
 			target[name] = type;
-			return;
+			continue;
 		}
 
 		target[name] = function (schema, args, params) {
@@ -39,7 +39,7 @@ module.exports = function toMethods(source) {
 				}
 			);
 		};
-	});
+	}
 
 	return target;
 };

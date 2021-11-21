@@ -6,7 +6,7 @@ module.exports = function type(schema, args, params) {
 	method('type');
 	oneArg(args);
 
-	var TYPE = args[0];
+	const TYPE = args[0];
 
 	if (!t.isIdentifier(TYPE)) {
 		throw new Error(`Method "type": first argument should be Data Type`);

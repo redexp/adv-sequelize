@@ -10,9 +10,9 @@ const names = [
 
 const methods = {};
 
-names.forEach(function (name) {
+for (const name of names) {
 	methods[name] = function (schema, args) {
-		var dataType = getProp(schema, 'dataType');
+		const dataType = getProp(schema, 'dataType');
 
 		if (!dataType) {
 			throw new Error(`Method "${name}": invalid schema`);
@@ -29,6 +29,6 @@ names.forEach(function (name) {
 
 		return schema;
 	};
-});
+}
 
 module.exports = methods;

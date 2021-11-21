@@ -90,10 +90,10 @@ module.exports = function (code, {
 
 	const columns = {};
 
-	Object.keys(properties).forEach(function (name) {
-		var {type, dataType, ...prop} = properties[name];
-		var columnOptions = pick(prop, columnMethodsNames);
-		var schemaOptions = omit(prop, columnMethodsNames);
+	for (const name in properties) {
+		let {type, dataType, ...prop} = properties[name];
+		let schemaOptions = omit(prop, columnMethodsNames);
+		const columnOptions = pick(prop, columnMethodsNames);
 
 		if (schemaOptions.description && !columnOptions.comment) {
 			columnOptions.comment = schemaOptions.description;
@@ -140,7 +140,7 @@ module.exports = function (code, {
 				schemaOptions.allOf
 			)
 		) {
-			let items = (
+			const items = (
 				schemaOptions.anyOf ||
 				schemaOptions.allOf
 			);
@@ -199,9 +199,9 @@ module.exports = function (code, {
 			type: dataType,
 			...columnOptions,
 		};
-	});
+	}
 
-	parser(`${title} = ${JSON.stringify(schema)}`, {schemas});
+	parser(`${title} = !!${JSON.stringify(schema)}`, {schemas});
 
 	return {name: title, columns, options, schema: cloneDeep(schema)};
 };
@@ -228,17 +228,17 @@ function getDataType(item) {
 }
 
 function isDataType(D, item) {
-	var type = getDataType(item);
+	const type = getDataType(item);
 
 	return !!type && has(D, type.path);
 }
 
 function convertDataType(D, item) {
-	var dataType = getDataType(item);
+	const dataType = getDataType(item);
 
 	if (!dataType) return item;
 
-	var TYPE = get(D, dataType.path);
+	let TYPE = get(D, dataType.path);
 
 	if (!TYPE) {
 		throw new Error(`Unknown data type: ${JSON.stringify(dataType.path)}`)
