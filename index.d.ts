@@ -20,7 +20,8 @@ export interface ParserOptions extends Params {
 
 export class ParsedModel extends Model {
     public static prop(prop: string): Validator;
-    public static props(...props: string[]): Validator;
+    public static props(prop: string | string[], ...props: string[]): Validator;
+    public static validateProps(data: {[prop: string]: any}): boolean;
 }
 
 export interface ParsedData {

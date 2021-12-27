@@ -76,6 +76,12 @@ function define(code, {sequelize: s, schemas, ajv, ...params} = {}) {
 			throw new Error(`${Model.name}.props required at least one argument`);
 		}
 
+		if (Array.isArray(props[0])) {
+			props = props[0];
+		}
+
+		props.sort();
+
 		const key = `_${props.join('_')}PropsValidator`;
 
 		if (Model[key]) return Model[key];
@@ -96,6 +102,14 @@ function define(code, {sequelize: s, schemas, ajv, ...params} = {}) {
 		}
 
 		return (Model[key] = createValidator(sch, ajv));
+	};
+
+	Model.validateProps = function (data) {
+		return (
+			Model
+			.props(Object.keys(data))
+			.validate(data)
+		);
 	};
 
 	return Model;

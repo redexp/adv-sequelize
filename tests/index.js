@@ -346,6 +346,7 @@ describe('createModel', function () {
 
 	it('Model methods', function () {
 		const Model = define(`User = {id: id.primaryKey(true), name: string.minLength(3), age: number}`, {sequelize});
+		const {ColumnValidationError} = define;
 
 		var v = Model.prop('id');
 
@@ -355,8 +356,8 @@ describe('createModel', function () {
 		expect(v.errors).to.be.an('array').and.to.have.length(1);
 		expect(v.isValid(1)).to.eql(true);
 
-		expect(() => v.validate(0)).to.throw(define.ColumnValidationError, 'must be >= 1');
-		expect(() => v.validate(1)).to.not.throw(define.ColumnValidationError, 'must be >= 1');
+		expect(() => v.validate(0)).to.throw(ColumnValidationError, 'must be >= 1');
+		expect(() => v.validate(1)).to.not.throw(ColumnValidationError, 'must be >= 1');
 
 		v = Model.props('name', 'age');
 
@@ -366,6 +367,9 @@ describe('createModel', function () {
 		expect(v.errors).to.be.an('array').and.to.have.length(1);
 		expect(v.isValid({name: 'asd', age: 0})).to.eql(true);
 		expect(v.isValid({name: 'asd'})).to.eql(false);
+
+		expect(() => Model.validateProps({name: ''})).to.throw(ColumnValidationError, 'name must NOT have fewer than 3 characters');
+		expect(() => Model.validateProps({name: 'abs'})).to.not.throw(ColumnValidationError);
 	});
 
 	it('default array', function () {
