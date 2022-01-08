@@ -1,15 +1,14 @@
 const {expect} = require('chai');
 const defaultSchemas = require('adv-parser/schemas');
-const modelSchemas = require('../schemas');
 const omit = require('lodash.omit');
-const {DataTypes: D} = require('sequelize');
+const Sequelize = require('sequelize');
+const {DataTypes: D} = Sequelize;
+const parser = require('../parser');
+const define = require('../index');
+const modelSchemas = require('../schemas');
+const sequelize = new Sequelize({dialect: 'postgres'});
 
 describe('createModel', function () {
-	const parser = require('../parser');
-	const define = require('../index');
-	const Sequelize = require('sequelize');
-	const sequelize = new Sequelize({dialect: 'postgres'});
-
 	var schemas = {};
 
 	const p = function (code) {
@@ -348,10 +347,10 @@ describe('createModel', function () {
 		const Model = define(`User = {id: id.primaryKey(true), name: string.minLength(3), age: number}`, {sequelize});
 		const {ColumnValidationError} = define;
 
-		var v = Model.prop('id');
+		var v = Model.propValidator('id');
 
-		expect(Model).to.have.property('_idPropValidator').and.to.be.an('object');
-		expect(Model.prop('id')).to.equal(v);
+		expect(Model).to.have.property('_propValidators').and.to.have.property('id');
+		expect(Model.propValidator('id')).to.equal(v);
 		expect(v.isValid(0)).to.eql(false);
 		expect(v.errors).to.be.an('array').and.to.have.length(1);
 		expect(v.isValid(1)).to.eql(true);
@@ -359,10 +358,10 @@ describe('createModel', function () {
 		expect(() => v.validate(0)).to.throw(ColumnValidationError, 'must be >= 1');
 		expect(() => v.validate(1)).to.not.throw(ColumnValidationError, 'must be >= 1');
 
-		v = Model.props('name', 'age');
+		v = Model.propsValidator('name', 'age');
 
-		expect(Model).to.have.property('_name_agePropsValidator').and.to.be.an('object');
-		expect(Model.props('name', 'age')).to.equal(v);
+		expect(Model).to.have.property('_propsValidators').and.to.have.property('age name');
+		expect(Model.propsValidator('age', 'name')).to.equal(v);
 		expect(v.isValid({name: '', age: 0})).to.eql(false);
 		expect(v.errors).to.be.an('array').and.to.have.length(1);
 		expect(v.isValid({name: 'asd', age: 0})).to.eql(true);
@@ -508,6 +507,52 @@ describe('createModel', function () {
 					]
 				},
 			}
+		});
+	});
+
+	it('Model.Schema', function () {
+		const User = define(`User = {age: number, name: string.minLength(3), year: number}`, {sequelize});
+
+		let schema = User.Schema.props('name', 'year').optional('year').toJSON();
+
+		expect(schema).to.eql({
+			type: 'object',
+			additionalProperties: false,
+			required: ['name'],
+			properties: {
+				name: {
+					type: 'string',
+					minLength: 3,
+				},
+				year: {
+					type: 'number',
+				},
+			},
+		});
+
+		schema = User.Schema.prop('name').maxLength(10).toJSON();
+
+		expect(schema).to.eql({
+			type: 'string',
+			minLength: 3,
+			maxLength: 10,
+		});
+
+		schema = User.Schema.omit('name').required(['year']).toJSON();
+
+		expect(schema).to.eql({
+			title: 'User',
+			type: 'object',
+			additionalProperties: false,
+			required: ['year'],
+			properties: {
+				age: {
+					type: 'number',
+				},
+				year: {
+					type: 'number',
+				},
+			},
 		});
 	});
 });

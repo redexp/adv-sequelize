@@ -1,4 +1,5 @@
 const parser = require('./parser');
+const SchemaGenerator = require('./SchemaGenerator');
 
 module.exports = define;
 module.exports.parser = parser;
@@ -53,64 +54,15 @@ function define(code, {sequelize: s, schemas, ajv, ...params} = {}) {
 
 	const Model = s.define(name, columns, options);
 
-	Model.prop = function (prop) {
-		if (!prop) {
-			throw new Error(`${Model.name}.prop required one argument`);
-		}
+	Model.ajv = ajv;
+	Model.Schema = new SchemaGenerator(schema);
 
-		const key = `_${prop}PropValidator`;
+	Model._propValidators = {};
+	Model._propsValidators = {};
 
-		if (Model[key]) return Model[key];
-
-		const sch = schema.properties[prop];
-
-		if (!sch) {
-			throw new Error(`Unknown ${Model.name} column ${JSON.stringify(prop)}`);
-		}
-
-		return (Model[key] = createValidator(sch, ajv));
-	};
-
-	Model.props = function (...props) {
-		if (props.length === 0) {
-			throw new Error(`${Model.name}.props required at least one argument`);
-		}
-
-		if (Array.isArray(props[0])) {
-			props = props[0];
-		}
-
-		props.sort();
-
-		const key = `_${props.join('_')}PropsValidator`;
-
-		if (Model[key]) return Model[key];
-
-		const sch = {
-			type: 'object',
-			additionalProperties: false,
-			required: props,
-			properties: {},
-		};
-
-		for (const prop of props) {
-			sch.properties[prop] = schema.properties[prop];
-
-			if (!sch.properties[prop]) {
-				throw new Error(`Unknown ${Model.name} column ${JSON.stringify(prop)}`);
-			}
-		}
-
-		return (Model[key] = createValidator(sch, ajv));
-	};
-
-	Model.validateProps = function (data) {
-		return (
-			Model
-			.props(Object.keys(data))
-			.validate(data)
-		);
-	};
+	Model.propValidator = propValidator;
+	Model.propsValidator = propsValidator;
+	Model.validateProps = validateProps;
 
 	return Model;
 }
@@ -166,6 +118,55 @@ function createValidator(schema, ajv) {
 	};
 
 	return validator;
+}
+
+function propValidator(name) {
+	if (!name) {
+		throw new Error(`${this.name}.prop required one argument`);
+	}
+
+	const {_propValidators: cache, Schema, ajv} = this;
+
+	if (!cache[name]) {
+		cache[name] = createValidator(
+			Schema.prop(name).toJSON(),
+			ajv
+		);
+	}
+
+	return cache[name];
+}
+
+function propsValidator(...props) {
+	if (props.length === 0) {
+		throw new Error(`${this.name}.props required at least one argument`);
+	}
+
+	if (Array.isArray(props[0])) {
+		props = props[0];
+	}
+
+	props.sort();
+
+	const {_propsValidators: cache, Schema, ajv} = this;
+	const key = props.join(' ');
+
+	if (!cache[key]) {
+		cache[key] = createValidator(
+			Schema.props(props).toJSON(),
+			ajv
+		);
+	}
+
+	return cache[key];
+}
+
+function validateProps(data) {
+	return (
+		this
+		.propsValidator(Object.keys(data))
+		.validate(data)
+	);
 }
 
 module.exports.ColumnValidationError = ColumnValidationError;
