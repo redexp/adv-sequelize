@@ -541,11 +541,31 @@ describe('createModel', function () {
 		schema = User.Schema.omit('name').required(['year']).toJSON();
 
 		expect(schema).to.eql({
-			title: 'User',
 			type: 'object',
 			additionalProperties: false,
 			required: ['year'],
 			properties: {
+				age: {
+					type: 'number',
+				},
+				year: {
+					type: 'number',
+				},
+			},
+		});
+
+		schema = User.Schema.required(['year']).title('Test').toJSON();
+
+		expect(schema).to.eql({
+			title: 'Test',
+			type: 'object',
+			additionalProperties: false,
+			required: ['year'],
+			properties: {
+				name: {
+					type: 'string',
+					minLength: 3,
+				},
 				age: {
 					type: 'number',
 				},

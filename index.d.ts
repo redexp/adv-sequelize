@@ -56,6 +56,7 @@ export class SchemaGenerator {
 
     id(id: string): SchemaGenerator;
     ref(ref: string): SchemaGenerator;
+    title(title: string): SchemaGenerator;
 
     prop(name: string): SchemaGenerator;
     props: PropsMethod;

@@ -11,7 +11,7 @@ class SchemaGenerator {
 
 	set(prop, value) {
 		const gen = new SchemaGenerator(this.schema);
-
+		delete gen.schema.title;
 		gen.schema[prop] = value;
 
 		return gen;
@@ -31,6 +31,10 @@ class SchemaGenerator {
 
 	ref(value) {
 		return this.set('$ref', value);
+	}
+
+	title(title) {
+		return this.set('title', title);
 	}
 
 	//region "object"
@@ -76,6 +80,7 @@ class SchemaGenerator {
 
 	add(properties) {
 		const gen = new SchemaGenerator(this.schema);
+		delete gen.schema.title;
 		const {schema} = gen;
 
 		Object.assign(schema.properties, cloneDeep(properties));
@@ -99,6 +104,7 @@ class SchemaGenerator {
 		props = toProps(props, 'remove');
 
 		const gen = new SchemaGenerator(this.schema);
+		delete gen.schema.title;
 		const {required, properties} = gen.schema;
 
 		for (const prop of props) {
@@ -122,6 +128,7 @@ class SchemaGenerator {
 
 	required(...props) {
 		const gen = new SchemaGenerator(this.schema);
+		delete gen.schema.title;
 		const {schema} = gen;
 		const {required, properties} = schema;
 
@@ -149,6 +156,7 @@ class SchemaGenerator {
 		props = toProps(props, 'notRequired');
 
 		const gen = new SchemaGenerator(this.schema);
+		delete gen.schema.title;
 		const {schema} = gen;
 
 		schema.required = schema.required.filter(name => !props.includes(name));
